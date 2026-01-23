@@ -1,0 +1,15 @@
+{
+  "chores": [
+    {
+      "id": "7870d78d-4484-41c9-a278-a499538cd248",
+      "title": "Clean Kitcken",
+      "assigneeId": "df86c210-2f6a-4cf5-a4a0-ee73b7d82df2",
+      "startDate": "2026-01-24T00:00:00.000Z",
+      "endDate": "2026-01-24T01:00:00.000Z",
+      "allDay": false,
+      "recurrence": "daily",
+      "createdAt": "2026-01-23T03:37:42.343Z",
+      "updatedAt": "2026-01-23T03:38:11.530Z"
+    }
+  ]
+}

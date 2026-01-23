@@ -1,0 +1,16 @@
+{
+  "members": [
+    {
+      "id": "a61080d7-9155-459b-9048-006287367bca",
+      "name": "Rishab",
+      "color": "#9B59B6",
+      "createdAt": "2026-01-23T03:37:50.435Z"
+    },
+    {
+      "id": "df86c210-2f6a-4cf5-a4a0-ee73b7d82df2",
+      "name": "Prerna",
+      "color": "#1ABC9C",
+      "createdAt": "2026-01-23T03:37:56.127Z"
+    }
+  ]
+}
