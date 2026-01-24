@@ -224,7 +224,7 @@ export function useChat({ userId, preferences, onPreferencesUpdate }: UseChatOpt
           ``
         ];
 
-        allPrefs.data.forEach((user, idx) => {
+        allPrefs.data.forEach((user) => {
           lines.push(`---`);
           lines.push(`### ${user.name || 'Unknown'} (${user.userId})`);
           lines.push(``);
