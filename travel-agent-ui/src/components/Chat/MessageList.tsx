@@ -23,7 +23,7 @@ export const MessageList: React.FC<MessageListProps> = ({ messages, isLoading, o
     return (
       <div className="message-list-empty">
         <div className="empty-state">
-          <span className="empty-icon">\u2708\ufe0f</span>
+          <span className="empty-icon">✈️</span>
           <h3>Start Planning Your Trip</h3>
           <p>Ask me about destinations, itineraries, or travel tips!</p>
           <div className="suggestion-chips">
@@ -49,7 +49,7 @@ export const MessageList: React.FC<MessageListProps> = ({ messages, isLoading, o
       ))}
       {isLoading && (
         <div className="message-bubble assistant">
-          <div className="message-avatar">\u2708\ufe0f</div>
+          <div className="message-avatar">✈️</div>
           <div className="message-content typing">
             <LoadingSpinner size="small" />
             <span>Planning your perfect trip...</span>

@@ -19,7 +19,7 @@ export const ActivityCard: React.FC<ActivityCardProps> = ({ activity }) => {
 
         {activity.location && (
           <div className="activity-location">
-            <span className="location-icon">\ud83d\udccd</span>
+            <span className="location-icon">📍</span>
             {activity.location}
           </div>
         )}
@@ -32,14 +32,14 @@ export const ActivityCard: React.FC<ActivityCardProps> = ({ activity }) => {
           )}
           {activity.accessibility && (
             <span className="activity-accessibility" title={activity.accessibility}>
-              \u267f {activity.accessibility}
+              ♿ {activity.accessibility}
             </span>
           )}
         </div>
 
         {activity.tips && (
           <div className="activity-tips">
-            <span className="tip-icon">\ud83d\udca1</span>
+            <span className="tip-icon">💡</span>
             {activity.tips}
           </div>
         )}

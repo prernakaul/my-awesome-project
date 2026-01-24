@@ -109,7 +109,7 @@ const App: React.FC = () => {
       <header className="app-header">
         <div className="header-content">
           <div className="logo">
-            <span className="logo-icon">\u2708\ufe0f</span>
+            <span className="logo-icon">✈️</span>
             <h1>AI Travel Agent</h1>
           </div>
           <div className="header-actions">

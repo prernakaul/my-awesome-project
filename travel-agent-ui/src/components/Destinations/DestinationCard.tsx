@@ -72,7 +72,7 @@ export const DestinationCard: React.FC<DestinationCardProps> = ({
             handleClick();
           }}
         >
-          Plan This Trip \u2192
+          Plan This Trip →
         </button>
       </div>
     </div>

@@ -24,11 +24,11 @@ export const ItineraryDisplay: React.FC<ItineraryDisplayProps> = ({ itinerary })
           </h2>
           <div className="itinerary-meta">
             <span className="meta-item">
-              <span className="meta-icon">\ud83d\udcc5</span>
+              <span className="meta-icon">📅</span>
               {itinerary.totalDays} days
             </span>
             <span className="meta-item">
-              <span className="meta-icon">\ud83d\udcb0</span>
+              <span className="meta-icon">💰</span>
               ${itinerary.totalBudget.low}-${itinerary.totalBudget.high} total
             </span>
           </div>
@@ -43,7 +43,7 @@ export const ItineraryDisplay: React.FC<ItineraryDisplayProps> = ({ itinerary })
 
       {itinerary.packingList && itinerary.packingList.length > 0 && (
         <div className="itinerary-section packing-list">
-          <h3>\ud83c\udf92 Packing Suggestions</h3>
+          <h3>🎒 Packing Suggestions</h3>
           <ul>
             {itinerary.packingList.map((item, idx) => (
               <li key={idx}>{item}</li>
@@ -54,7 +54,7 @@ export const ItineraryDisplay: React.FC<ItineraryDisplayProps> = ({ itinerary })
 
       {itinerary.travelTips && itinerary.travelTips.length > 0 && (
         <div className="itinerary-section travel-tips">
-          <h3>\ud83d\udca1 Travel Tips</h3>
+          <h3>💡 Travel Tips</h3>
           <ul>
             {itinerary.travelTips.map((tip, idx) => (
               <li key={idx}>{tip}</li>

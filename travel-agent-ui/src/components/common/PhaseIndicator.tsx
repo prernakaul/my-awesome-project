@@ -6,10 +6,10 @@ interface PhaseIndicatorProps {
 }
 
 const PHASES: { key: AppPhase; label: string; icon: string }[] = [
-  { key: 'onboarding', label: 'Preferences', icon: '\ud83d\udcdd' },
-  { key: 'destination_selection', label: 'Destinations', icon: '\ud83c\udf0e' },
-  { key: 'itinerary', label: 'Itinerary', icon: '\ud83d\udcc5' },
-  { key: 'chat', label: 'Chat', icon: '\ud83d\udcac' }
+  { key: 'onboarding', label: 'Preferences', icon: '📝' },
+  { key: 'destination_selection', label: 'Destinations', icon: '🌎' },
+  { key: 'itinerary', label: 'Itinerary', icon: '📅' },
+  { key: 'chat', label: 'Chat', icon: '💬' }
 ];
 
 export const PhaseIndicator: React.FC<PhaseIndicatorProps> = ({ currentPhase }) => {
@@ -27,7 +27,7 @@ export const PhaseIndicator: React.FC<PhaseIndicatorProps> = ({ currentPhase }) 
               className={`phase-step ${isActive ? 'active' : ''} ${isCompleted ? 'completed' : ''}`}
             >
               <div className="phase-icon">
-                {isCompleted ? '\u2713' : phase.icon}
+                {isCompleted ? '✓' : phase.icon}
               </div>
               <span className="phase-label">{phase.label}</span>
             </div>

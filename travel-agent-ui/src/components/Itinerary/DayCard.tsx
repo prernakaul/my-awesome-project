@@ -28,7 +28,7 @@ export const DayCard: React.FC<DayCardProps> = ({ day, isExpanded = false }) => 
               </span>
             </div>
           )}
-          <span className="expand-icon">{expanded ? '\u25b2' : '\u25bc'}</span>
+          <span className="expand-icon">{expanded ? '▲' : '▼'}</span>
         </div>
       </div>
 
@@ -46,7 +46,7 @@ export const DayCard: React.FC<DayCardProps> = ({ day, isExpanded = false }) => 
               <div className="meals-grid">
                 {day.meals.breakfast && (
                   <div className="meal-item">
-                    <span className="meal-icon">\u2615</span>
+                    <span className="meal-icon">☕</span>
                     <div>
                       <span className="meal-label">Breakfast</span>
                       <span className="meal-name">{day.meals.breakfast}</span>
@@ -55,7 +55,7 @@ export const DayCard: React.FC<DayCardProps> = ({ day, isExpanded = false }) => 
                 )}
                 {day.meals.lunch && (
                   <div className="meal-item">
-                    <span className="meal-icon">\ud83c\udf7d\ufe0f</span>
+                    <span className="meal-icon">🍽️</span>
                     <div>
                       <span className="meal-label">Lunch</span>
                       <span className="meal-name">{day.meals.lunch}</span>
@@ -64,7 +64,7 @@ export const DayCard: React.FC<DayCardProps> = ({ day, isExpanded = false }) => 
                 )}
                 {day.meals.dinner && (
                   <div className="meal-item">
-                    <span className="meal-icon">\ud83c\udf77</span>
+                    <span className="meal-icon">🍷</span>
                     <div>
                       <span className="meal-label">Dinner</span>
                       <span className="meal-name">{day.meals.dinner}</span>
@@ -77,7 +77,7 @@ export const DayCard: React.FC<DayCardProps> = ({ day, isExpanded = false }) => 
 
           {day.notes && (
             <div className="day-notes">
-              <span className="notes-icon">\ud83d\udcdd</span>
+              <span className="notes-icon">📝</span>
               {day.notes}
             </div>
           )}
