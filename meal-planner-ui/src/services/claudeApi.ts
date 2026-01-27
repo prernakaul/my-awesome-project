@@ -1,27 +1,79 @@
 import Anthropic from '@anthropic-ai/sdk'
 import { UserProfile } from '../types'
+import { BRAIN_FOOD_PRINCIPLES, RECIPES } from '../data/brainFoodKnowledge'
 
-const SYSTEM_PROMPT = `You are an expert nutritionist and culinary specialist with comprehensive knowledge of global cuisines, dietary science, and practical meal planning.
+const SYSTEM_PROMPT = `You are a brain-health nutrition expert trained on the principles and research of Dr. Lisa Mosconi, author of "Brain Food: The Surprising Science of Eating for Cognitive Power."
 
-When creating meal plans, format them clearly with:
-## [Day name]
-### Breakfast
-**[Meal name]** - [Prep time] - [Calories] cal
-- Brief description
+Your mission is to help users eat smarter to sharpen their minds through simple, practical meal planning.
 
-### Lunch
-**[Meal name]** - [Prep time] - [Calories] cal
-- Brief description
+## Your Expertise:
+- Neuro-nutrition and how food affects cognitive function
+- The Mediterranean diet and its brain-health benefits
+- Omega-3 fatty acids (especially DHA) and brain cell health
+- Antioxidants and their role in protecting brain cells
+- Anti-inflammatory foods and reducing brain aging
 
-### Dinner
-**[Meal name]** - [Prep time] - [Calories] cal
-- Brief description
+## Core Principles You Follow:
+${BRAIN_FOOD_PRINCIPLES}
 
-### Snack
-**[Meal name]** - [Calories] cal
-- Brief description
+## Your Approach:
+1. **Keep it SIMPLE** - Users are newbie cooks. Maximum 4-5 recipes per week.
+2. **Batch cooking** - Cook once, eat multiple times throughout the week
+3. **Brain benefits** - Always explain WHY each food is good for the brain
+4. **Practical** - Focus on easy-to-find ingredients and simple techniques
+5. **Encouraging** - Make brain-healthy eating feel achievable, not overwhelming
 
-Always consider the user's dietary restrictions, health goals, budget, cooking time, skill level, and cuisine preferences when making recommendations.`
+## Available Recipes in Your Knowledge Base:
+${Object.entries(RECIPES).map(([category, items]) =>
+  `### ${category.charAt(0).toUpperCase() + category.slice(1)}:\n${items.map(r => `- ${r.name} (${r.time}): ${r.brainBenefit}`).join('\n')}`
+).join('\n\n')}
+
+## Sample Weekly Plan Structure:
+When creating meal plans, use this format:
+
+\`\`\`weekly_plan
+WEEK: [Week name]
+DESCRIPTION: [Brief description]
+
+RECIPES_THIS_WEEK:
+1. [Recipe name] - [Category] - [Time]
+2. [Recipe name] - [Category] - [Time]
+3. [Recipe name] - [Category] - [Time]
+4. [Recipe name] - [Category] - [Time]
+5. [Recipe name] - [Category] - [Time]
+
+MONDAY:
+- Breakfast: [Recipe] [Note if leftovers]
+- Lunch: [Recipe] [Note]
+- Dinner: [Recipe] [Note]
+- Snack: [Recipe]
+
+[Continue for each day...]
+
+BRAIN_TIP: [One actionable brain-health tip for the week]
+\`\`\`
+
+## When showing a single recipe, use:
+\`\`\`recipe
+NAME: [Recipe name]
+TIME: [Prep + cook time]
+SERVINGS: [Number]
+BRAIN_BENEFIT: [Why this is good for the brain]
+
+INGREDIENTS:
+- [ingredient 1]
+- [ingredient 2]
+...
+
+INSTRUCTIONS:
+1. [Step 1]
+2. [Step 2]
+...
+
+TIP: [Helpful cooking or storage tip]
+\`\`\`
+
+Remember: Your goal is to make brain-healthy eating EASY and ACCESSIBLE. Don't overwhelm users with too many recipes - simplicity is key!`
 
 export class ClaudeApiService {
   private client: Anthropic | null = null
@@ -38,16 +90,14 @@ export class ClaudeApiService {
 
   buildUserContext(profile: UserProfile): string {
     return `User Profile:
-- Dietary restrictions/preferences: ${profile.dietaryRestrictions || 'None specified'}
-- Health goals: ${profile.healthGoals || 'General wellness'}
-- Household size: ${profile.householdSize || 'Not specified'}
-- Weekly budget: ${profile.budget || 'Flexible'}
-- Cooking time available: ${profile.cookingTime || 'Varies'}
-- Cooking skill level: ${profile.skillLevel || 'Intermediate'}
-- Cuisine preferences: ${profile.cuisinePreferences || 'Open to all'}
-- Foods to avoid: ${profile.foodsToAvoid || 'None'}
+- Name: ${profile.name || 'Friend'}
+- Cooking skill level: ${profile.skillLevel || 'Beginner'}
+- Servings per meal: ${profile.servings || '2'}
+- Goals: ${profile.goals?.join(', ') || 'General brain health'}
+- Dietary restrictions: ${profile.dietaryRestrictions || 'None'}
+- Time available for cooking: ${profile.cookingTime || 'Limited'}
 
-Please keep this profile in mind when making meal recommendations.`
+Remember to keep recommendations simple and achievable for this user's skill level.`
   }
 
   async sendMessage(
@@ -55,7 +105,7 @@ Please keep this profile in mind when making meal recommendations.`
     userProfile: UserProfile
   ): Promise<string> {
     if (!this.client) {
-      return this.getMockResponse(messages[messages.length - 1]?.content || '')
+      return this.getMockResponse(messages[messages.length - 1]?.content || '', userProfile)
     }
 
     try {
@@ -79,57 +129,178 @@ Please keep this profile in mind when making meal recommendations.`
     }
   }
 
-  private getMockResponse(userMessage: string): string {
+  private getMockResponse(userMessage: string, profile: UserProfile): string {
     const lowerMessage = userMessage.toLowerCase()
+    const userName = profile.name || 'there'
 
-    if (lowerMessage.includes('meal plan') || lowerMessage.includes('weekly')) {
-      return `Here's a sample meal plan for you:
+    if (lowerMessage.includes('meal plan') || lowerMessage.includes('weekly') || lowerMessage.includes('week')) {
+      return `Hi ${userName}! Here's your Brain-Boosting Beginner Week - just **5 simple recipes** that you'll mix and match all week:
 
-## Monday
-### Breakfast
-**Greek Yogurt Parfait** - 10 min - 350 cal
-- Creamy Greek yogurt layered with fresh berries and granola
+\`\`\`weekly_plan
+WEEK: Brain-Boosting Beginner Week
+DESCRIPTION: A simple week designed for newbie cooks. Cook once, eat multiple times!
 
-### Lunch
-**Mediterranean Quinoa Bowl** - 20 min - 450 cal
-- Fluffy quinoa with chickpeas, cucumber, tomatoes, and feta
+RECIPES_THIS_WEEK:
+1. Swiss Overnight Oats - Breakfast - 10 min prep
+2. Lentil Dal with Spinach - Lunch/Dinner - 25 min
+3. Grilled Salmon in Ginger Marinade - Dinner - 20 min
+4. Rainbow Buddha Bowl - Lunch/Dinner - 30 min
+5. Brain-Healthy Trail Mix - Snack - 5 min
 
-### Dinner
-**Lemon Herb Grilled Chicken** - 30 min - 520 cal
-- Tender chicken breast with roasted vegetables
+MONDAY:
+- Breakfast: Swiss Overnight Oats (prep Sunday night!)
+- Lunch: Lentil Dal with Spinach (make a big batch)
+- Dinner: Grilled Salmon with steamed veggies
+- Snack: Brain-Healthy Trail Mix
 
-### Snack
-**Apple with Almond Butter** - 180 cal
-- Fresh apple slices with creamy almond butter
+TUESDAY:
+- Breakfast: Swiss Overnight Oats (leftovers)
+- Lunch: Lentil Dal (tastes even better day 2!)
+- Dinner: Rainbow Buddha Bowl
+- Snack: Brain-Healthy Trail Mix
 
-## Tuesday
-### Breakfast
-**Avocado Toast with Eggs** - 15 min - 400 cal
-- Whole grain toast topped with mashed avocado and poached eggs
+WEDNESDAY:
+- Breakfast: Swiss Overnight Oats (last of batch)
+- Lunch: Rainbow Buddha Bowl (leftovers)
+- Dinner: Lentil Dal
+- Snack: Brain-Healthy Trail Mix
 
-### Lunch
-**Asian Chicken Salad** - 15 min - 380 cal
-- Mixed greens with grilled chicken and sesame dressing
+THURSDAY:
+- Breakfast: Swiss Overnight Oats (make fresh batch)
+- Lunch: Lentil Dal (last of batch)
+- Dinner: Grilled Salmon
+- Snack: Brain-Healthy Trail Mix
 
-### Dinner
-**Baked Salmon with Asparagus** - 25 min - 480 cal
-- Wild-caught salmon with roasted asparagus
+FRIDAY:
+- Breakfast: Swiss Overnight Oats
+- Lunch: Rainbow Buddha Bowl (make fresh)
+- Dinner: Rainbow Buddha Bowl
+- Snack: Brain-Healthy Trail Mix
 
-### Snack
-**Mixed Nuts** - 160 cal
-- A handful of almonds, walnuts, and cashews
+BRAIN_TIP: Start each morning with a glass of warm water and lemon - it hydrates your brain and aids digestion!
+\`\`\`
 
-This plan provides balanced nutrition while being easy to prepare. Would you like me to modify anything?`
+**Why these recipes are brain-boosters:**
+- **Salmon**: Packed with DHA omega-3s, the building blocks of brain cell membranes
+- **Lentil Dal**: Turmeric helps your brain absorb omega-3s better
+- **Overnight Oats**: Fiber keeps blood sugar steady for sustained focus
+- **Buddha Bowl**: Colorful veggies = diverse antioxidants protecting brain cells
+- **Trail Mix**: Walnuts literally look like little brains - they're full of omega-3s!
+
+Would you like me to show you any of these recipes in detail?`
     }
 
-    return `I'd be happy to help with your meal planning needs! Here are some things I can help with:
+    if (lowerMessage.includes('recipe') || lowerMessage.includes('salmon')) {
+      const salmon = RECIPES.dinner.find(r => r.id === 'grilled-salmon-ginger')!
+      return `Here's one of my favorite brain-boosting recipes:
 
-- **Weekly meal plans** tailored to your dietary needs
-- **Recipe suggestions** based on ingredients you have
-- **Grocery lists** organized by store section
-- **Nutritional guidance** for your health goals
+\`\`\`recipe
+NAME: ${salmon.name}
+TIME: ${salmon.time}
+SERVINGS: ${salmon.servings}
+BRAIN_BENEFIT: ${salmon.brainBenefit}
 
-What would you like me to help you with today?`
+INGREDIENTS:
+${salmon.ingredients.map(i => `- ${i}`).join('\n')}
+
+INSTRUCTIONS:
+${salmon.instructions.map((s, i) => `${i + 1}. ${s}`).join('\n')}
+
+TIP: Wild-caught Alaskan salmon has the highest omega-3 content. Look for it at Costco or Trader Joe's!
+\`\`\`
+
+This recipe is perfect for brain health because wild salmon is the **#1 food source of DHA** - the omega-3 fatty acid that makes up a large part of your brain cell membranes!`
+    }
+
+    if (lowerMessage.includes('snack') || lowerMessage.includes('trail mix')) {
+      const trailMix = RECIPES.snacks.find(r => r.id === 'brain-trail-mix')!
+      return `Here's the ultimate brain-healthy snack:
+
+\`\`\`recipe
+NAME: ${trailMix.name}
+TIME: ${trailMix.time}
+SERVINGS: ${trailMix.servings}
+BRAIN_BENEFIT: ${trailMix.brainBenefit}
+
+INGREDIENTS:
+${trailMix.ingredients.map(i => `- ${i}`).join('\n')}
+
+INSTRUCTIONS:
+${trailMix.instructions.map((s, i) => `${i + 1}. ${s}`).join('\n')}
+
+TIP: Pre-portion into small containers for grab-and-go brain fuel!
+\`\`\`
+
+**Brain benefits of each ingredient:**
+- **Walnuts**: Highest omega-3 content of any nut
+- **Brazil nuts**: Selenium for brain cell protection
+- **Goji berries**: Antioxidants that cross the blood-brain barrier
+- **Cacao nibs**: Flavonoids that improve blood flow to the brain
+- **Pumpkin seeds**: Zinc for memory and focus`
+    }
+
+    if (lowerMessage.includes('grocery') || lowerMessage.includes('shopping')) {
+      return `Here's your **Brain-Boosting Grocery List** for the week:
+
+**Produce:**
+- Baby spinach (2 bags)
+- Sweet potatoes (4)
+- Blueberries (2 pints)
+- Apples (4)
+- Lemons (4)
+- Fresh ginger root
+- Garlic (1 head)
+- Yellow onions (2)
+- Fresh cilantro
+- Broccolini (2 bunches)
+
+**Protein:**
+- Wild Alaskan salmon (12 oz)
+- Chickpeas (2 cans)
+
+**Dairy:**
+- Greek yogurt (32 oz)
+- Organic whole milk (1 quart)
+
+**Grains & Legumes:**
+- Steel-cut oats (1 lb)
+- Quinoa (1 lb)
+- Red lentils (1 lb)
+
+**Pantry:**
+- Extra virgin olive oil
+- Coconut oil
+- Tahini
+- Maple syrup
+- Tamari or soy sauce
+- Vegetable broth (2 cartons)
+- Diced tomatoes (2 cans)
+- Coconut milk (1 can)
+
+**Nuts & Seeds:**
+- Walnuts, Almonds, Hazelnuts
+- Chia seeds, Pumpkin seeds
+- Goji berries
+
+**Brain Tip:** Shop the perimeter of the store first - that's where all the fresh, brain-healthy foods are!`
+    }
+
+    return `Hi ${userName}! I'm your brain-health nutrition guide, trained on the research of Dr. Lisa Mosconi.
+
+I can help you with:
+
+🧠 **Weekly Meal Plans** - Just 4-5 simple recipes that repeat throughout the week
+🥗 **Brain-Boosting Recipes** - Easy dishes with powerful cognitive benefits
+🛒 **Grocery Lists** - Organized shopping lists for your meal plan
+💡 **Brain Food Tips** - Simple habits to sharpen your mind
+
+**Quick facts about brain-healthy eating:**
+- Omega-3s (from salmon, walnuts) build brain cell membranes
+- Berries protect brain cells from aging
+- Turmeric helps your brain absorb nutrients
+- Hydration is crucial - 8 glasses of water daily!
+
+What would you like to explore? Try asking for a "weekly meal plan" or "show me a recipe"!`
   }
 }
 

@@ -1,4 +1,4 @@
-import { MealPlan } from '../../types'
+import { MealPlan, LegacyDayPlan } from '../../types'
 import { DayCard } from './DayCard'
 
 interface MealPlanDisplayProps {
@@ -13,7 +13,7 @@ export function MealPlanDisplay({ mealPlan }: MealPlanDisplayProps) {
         <p>{mealPlan.days.length} days planned</p>
       </div>
       <div className="meal-plan-days">
-        {mealPlan.days.map((day, index) => (
+        {mealPlan.days.map((day: LegacyDayPlan, index: number) => (
           <DayCard key={index} day={day} />
         ))}
       </div>

@@ -1,8 +1,8 @@
-import { Meal } from '../../types'
+import { LegacyMeal } from '../../types'
 import { FoodImage } from '../common/FoodImage'
 
 interface MealCardProps {
-  meal: Meal
+  meal: LegacyMeal
 }
 
 const mealIcons: Record<string, string> = {

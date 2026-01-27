@@ -1,8 +1,8 @@
-import { DayPlan } from '../../types'
+import { LegacyDayPlan } from '../../types'
 import { MealCard } from './MealCard'
 
 interface DayCardProps {
-  day: DayPlan
+  day: LegacyDayPlan
 }
 
 export function DayCard({ day }: DayCardProps) {

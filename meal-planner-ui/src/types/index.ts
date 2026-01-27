@@ -1,12 +1,10 @@
 export interface UserProfile {
+  name: string
+  skillLevel: 'beginner' | 'intermediate' | 'advanced'
+  servings: string
+  goals: string[]
   dietaryRestrictions: string
-  healthGoals: string
-  householdSize: string
-  budget: string
   cookingTime: string
-  skillLevel: string
-  cuisinePreferences: string
-  foodsToAvoid: string
 }
 
 export interface Message {
@@ -16,28 +14,72 @@ export interface Message {
   timestamp: Date
 }
 
-export interface MealPlan {
+export interface Recipe {
+  id: string
+  name: string
+  time: string
+  servings: string | number
+  brainBenefit: string
+  ingredients: string[]
+  instructions: string[]
+  tip?: string
+  category?: string
+  difficulty?: string
+}
+
+export interface WeeklyPlan {
+  weekName: string
+  description: string
+  recipes: Array<{
+    name: string
+    category: string
+    time: string
+  }>
   days: DayPlan[]
+  brainTip: string
 }
 
 export interface DayPlan {
   day: string
-  date?: string
   meals: Meal[]
 }
 
 export interface Meal {
   type: 'breakfast' | 'lunch' | 'dinner' | 'snack'
   name: string
-  description: string
-  prepTime?: string
-  calories?: number
-  ingredients?: string[]
+  note?: string
 }
 
 export interface OnboardingQuestion {
   id: string
   question: string
-  placeholder: string
+  type: 'text' | 'select' | 'multiselect'
+  options?: Array<{ value: string; label: string; description?: string }>
+  placeholder?: string
   field: keyof UserProfile
+}
+
+export interface ParsedContent {
+  type: 'text' | 'weekly_plan' | 'recipe'
+  content: string | WeeklyPlan | Recipe
+}
+
+// Legacy types for backward compatibility with old components
+export interface MealPlan {
+  days: LegacyDayPlan[]
+}
+
+export interface LegacyDayPlan {
+  day: string
+  date?: string
+  meals: LegacyMeal[]
+}
+
+export interface LegacyMeal {
+  type: 'breakfast' | 'lunch' | 'dinner' | 'snack'
+  name: string
+  description: string
+  prepTime?: string
+  calories?: number
+  ingredients?: string[]
 }
