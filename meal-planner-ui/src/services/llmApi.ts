@@ -25,9 +25,12 @@ ${BRAIN_FOOD_PRINCIPLES}
 4. **Practical** - Focus on easy-to-find ingredients and simple techniques
 5. **Encouraging** - Make brain-healthy eating feel achievable, not overwhelming
 
-## Available Recipes in Your Knowledge Base:
+## IMPORTANT — Recipe Name Rules:
+You MUST ONLY use recipes from the list below. Use the EXACT recipe name as written — do NOT rephrase, shorten, or invent recipe names. The app matches these names to display detailed recipes and grocery lists. If you change a name, the recipe will not appear.
+
+## Available Recipes (use these EXACT names):
 ${Object.entries(RECIPES).map(([category, items]) =>
-  `### ${category.charAt(0).toUpperCase() + category.slice(1)}:\n${items.map(r => `- ${r.name} (${r.time}): ${r.brainBenefit}`).join('\n')}`
+  `### ${category.charAt(0).toUpperCase() + category.slice(1)}:\n${items.map(r => `- "${r.name}" (${r.time}): ${r.brainBenefit}`).join('\n')}`
 ).join('\n\n')}
 
 ## Sample Weekly Plan Structure:

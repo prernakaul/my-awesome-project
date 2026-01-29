@@ -26,10 +26,32 @@ function getRecipeById(id: string): (typeof ALL_RECIPES)[0] | null {
 }
 
 function getRecipeByName(name: string): (typeof ALL_RECIPES)[0] | null {
-  return ALL_RECIPES.find(r =>
-    r.name.toLowerCase().includes(name.toLowerCase()) ||
-    name.toLowerCase().includes(r.name.toLowerCase())
-  ) || null
+  const lower = name.toLowerCase()
+
+  // Exact match
+  const exact = ALL_RECIPES.find(r => r.name.toLowerCase() === lower)
+  if (exact) return exact
+
+  // Substring match (either direction)
+  const substring = ALL_RECIPES.find(r =>
+    r.name.toLowerCase().includes(lower) ||
+    lower.includes(r.name.toLowerCase())
+  )
+  if (substring) return substring
+
+  // Keyword match: find the recipe sharing the most words with the name
+  const nameWords = lower.split(/\s+/).filter(w => w.length > 2)
+  let bestMatch: (typeof ALL_RECIPES)[0] | null = null
+  let bestScore = 0
+  for (const r of ALL_RECIPES) {
+    const recipeWords = r.name.toLowerCase().split(/\s+/)
+    const score = nameWords.filter(w => recipeWords.some(rw => rw.includes(w) || w.includes(rw))).length
+    if (score > bestScore && score >= 2) {
+      bestScore = score
+      bestMatch = r
+    }
+  }
+  return bestMatch
 }
 
 export function MealPlanDashboard({
