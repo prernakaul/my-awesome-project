@@ -2,7 +2,7 @@ import { useState } from 'react'
 import { QuestionFlow } from './components/Questions/QuestionFlow'
 import { MealPlanDashboard } from './components/Dashboard/MealPlanDashboard'
 import { UserProfile, WeeklyPlan } from './types'
-import { claudeApi } from './services/claudeApi'
+import { llmApi } from './services/llmApi'
 
 function App() {
   const [userProfile, setUserProfile] = useState<UserProfile | null>(null)
@@ -14,7 +14,7 @@ function App() {
     setIsGenerating(true)
 
     try {
-      const response = await claudeApi.sendMessage(
+      const response = await llmApi.sendMessage(
         [{ role: 'user', content: 'Create a weekly meal plan for me' }],
         profile
       )
@@ -35,7 +35,7 @@ function App() {
     setIsGenerating(true)
 
     try {
-      const response = await claudeApi.sendMessage(
+      const response = await llmApi.sendMessage(
         [{ role: 'user', content: 'Create a different weekly meal plan for me with new recipes' }],
         userProfile
       )

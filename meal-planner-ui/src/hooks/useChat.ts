@@ -1,6 +1,6 @@
 import { useState, useCallback } from 'react'
 import { Message, UserProfile } from '../types'
-import { claudeApi } from '../services/claudeApi'
+import { llmApi } from '../services/llmApi'
 
 export function useChat(userProfile: UserProfile) {
   const [messages, setMessages] = useState<Message[]>([])
@@ -23,7 +23,7 @@ export function useChat(userProfile: UserProfile) {
         content: m.content
       }))
 
-      const response = await claudeApi.sendMessage(conversationHistory, userProfile)
+      const response = await llmApi.sendMessage(conversationHistory, userProfile)
 
       const assistantMessage: Message = {
         id: `assistant-${Date.now()}`,

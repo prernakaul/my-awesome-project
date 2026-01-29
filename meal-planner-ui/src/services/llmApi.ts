@@ -1,6 +1,7 @@
-import Anthropic from '@anthropic-ai/sdk'
 import { UserProfile } from '../types'
 import { BRAIN_FOOD_PRINCIPLES, RECIPES } from '../data/brainFoodKnowledge'
+
+const OLLAMA_URL = import.meta.env.VITE_OLLAMA_URL || 'http://localhost:11434'
 
 const SYSTEM_PROMPT = `You are a brain-health nutrition expert trained on the principles and research of Dr. Lisa Mosconi, author of "Brain Food: The Surprising Science of Eating for Cognitive Power."
 
@@ -75,18 +76,8 @@ TIP: [Helpful cooking or storage tip]
 
 Remember: Your goal is to make brain-healthy eating EASY and ACCESSIBLE. Don't overwhelm users with too many recipes - simplicity is key!`
 
-export class ClaudeApiService {
-  private client: Anthropic | null = null
-
-  constructor() {
-    const apiKey = import.meta.env.VITE_ANTHROPIC_API_KEY
-    if (apiKey) {
-      this.client = new Anthropic({
-        apiKey,
-        dangerouslyAllowBrowser: true
-      })
-    }
-  }
+export class LlmApiService {
+  private available: boolean = true
 
   buildUserContext(profile: UserProfile): string {
     return `User Profile:
@@ -104,28 +95,37 @@ Remember to keep recommendations simple and achievable for this user's skill lev
     messages: Array<{ role: 'user' | 'assistant'; content: string }>,
     userProfile: UserProfile
   ): Promise<string> {
-    if (!this.client) {
+    if (!this.available) {
       return this.getMockResponse(messages[messages.length - 1]?.content || '', userProfile)
     }
 
     try {
       const systemPrompt = `${SYSTEM_PROMPT}\n\n${this.buildUserContext(userProfile)}`
 
-      const response = await this.client.messages.create({
-        model: 'claude-sonnet-4-20250514',
-        max_tokens: 4096,
-        system: systemPrompt,
-        messages: messages.map(m => ({
-          role: m.role,
-          content: m.content
-        }))
+      const response = await fetch(`${OLLAMA_URL}/api/chat`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          model: 'llama3.1',
+          messages: [
+            { role: 'system', content: systemPrompt },
+            ...messages.map(m => ({ role: m.role, content: m.content }))
+          ],
+          stream: false
+        })
       })
 
-      const textBlock = response.content.find(block => block.type === 'text')
-      return textBlock && 'text' in textBlock ? textBlock.text : 'I apologize, but I could not generate a response.'
+      if (!response.ok) {
+        throw new Error(`Ollama API error: ${response.status}`)
+      }
+
+      const data = await response.json()
+      return data.message?.content || 'I apologize, but I could not generate a response.'
     } catch (error) {
-      console.error('Claude API error:', error)
-      throw new Error('Failed to get response from Claude')
+      console.error('Ollama API error:', error)
+      // Fall back to mock responses when Ollama is unreachable (e.g. deployed on Vercel/Railway)
+      this.available = false
+      return this.getMockResponse(messages[messages.length - 1]?.content || '', userProfile)
     }
   }
 
@@ -304,4 +304,4 @@ What would you like to explore? Try asking for a "weekly meal plan" or "show me 
   }
 }
 
-export const claudeApi = new ClaudeApiService()
+export const llmApi = new LlmApiService()
