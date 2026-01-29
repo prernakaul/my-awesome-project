@@ -78,6 +78,7 @@ Remember: Your goal is to make brain-healthy eating EASY and ACCESSIBLE. Don't o
 
 export class LlmApiService {
   private available: boolean = true
+  private mockPlanIndex: number = 0
 
   buildUserContext(profile: UserProfile): string {
     return `User Profile:
@@ -134,60 +135,10 @@ Remember to keep recommendations simple and achievable for this user's skill lev
     const userName = profile.name || 'there'
 
     if (lowerMessage.includes('meal plan') || lowerMessage.includes('weekly') || lowerMessage.includes('week')) {
-      return `Hi ${userName}! Here's your Brain-Boosting Beginner Week - just **5 simple recipes** that you'll mix and match all week:
-
-\`\`\`weekly_plan
-WEEK: Brain-Boosting Beginner Week
-DESCRIPTION: A simple week designed for newbie cooks. Cook once, eat multiple times!
-
-RECIPES_THIS_WEEK:
-1. Swiss Overnight Oats - Breakfast - 10 min prep
-2. Lentil Dal with Spinach - Lunch/Dinner - 25 min
-3. Grilled Salmon in Ginger Marinade - Dinner - 20 min
-4. Rainbow Buddha Bowl - Lunch/Dinner - 30 min
-5. Brain-Healthy Trail Mix - Snack - 5 min
-
-MONDAY:
-- Breakfast: Swiss Overnight Oats (prep Sunday night!)
-- Lunch: Lentil Dal with Spinach (make a big batch)
-- Dinner: Grilled Salmon with steamed veggies
-- Snack: Brain-Healthy Trail Mix
-
-TUESDAY:
-- Breakfast: Swiss Overnight Oats (leftovers)
-- Lunch: Lentil Dal (tastes even better day 2!)
-- Dinner: Rainbow Buddha Bowl
-- Snack: Brain-Healthy Trail Mix
-
-WEDNESDAY:
-- Breakfast: Swiss Overnight Oats (last of batch)
-- Lunch: Rainbow Buddha Bowl (leftovers)
-- Dinner: Lentil Dal
-- Snack: Brain-Healthy Trail Mix
-
-THURSDAY:
-- Breakfast: Swiss Overnight Oats (make fresh batch)
-- Lunch: Lentil Dal (last of batch)
-- Dinner: Grilled Salmon
-- Snack: Brain-Healthy Trail Mix
-
-FRIDAY:
-- Breakfast: Swiss Overnight Oats
-- Lunch: Rainbow Buddha Bowl (make fresh)
-- Dinner: Rainbow Buddha Bowl
-- Snack: Brain-Healthy Trail Mix
-
-BRAIN_TIP: Start each morning with a glass of warm water and lemon - it hydrates your brain and aids digestion!
-\`\`\`
-
-**Why these recipes are brain-boosters:**
-- **Salmon**: Packed with DHA omega-3s, the building blocks of brain cell membranes
-- **Lentil Dal**: Turmeric helps your brain absorb omega-3s better
-- **Overnight Oats**: Fiber keeps blood sugar steady for sustained focus
-- **Buddha Bowl**: Colorful veggies = diverse antioxidants protecting brain cells
-- **Trail Mix**: Walnuts literally look like little brains - they're full of omega-3s!
-
-Would you like me to show you any of these recipes in detail?`
+      const plans = this.getMockWeeklyPlans(userName)
+      const plan = plans[this.mockPlanIndex % plans.length]
+      this.mockPlanIndex++
+      return plan
     }
 
     if (lowerMessage.includes('recipe') || lowerMessage.includes('salmon')) {
@@ -301,6 +252,175 @@ I can help you with:
 - Hydration is crucial - 8 glasses of water daily!
 
 What would you like to explore? Try asking for a "weekly meal plan" or "show me a recipe"!`
+  }
+
+  private getMockWeeklyPlans(userName: string): string[] {
+    return [
+      `Hi ${userName}! Here's your Brain-Boosting Beginner Week - just **5 simple recipes** that you'll mix and match all week:
+
+\`\`\`weekly_plan
+WEEK: Brain-Boosting Beginner Week
+DESCRIPTION: A simple week designed for newbie cooks. Cook once, eat multiple times!
+
+RECIPES_THIS_WEEK:
+1. Swiss Overnight Oats - Breakfast - 10 min prep
+2. Lentil Dal with Spinach - Lunch/Dinner - 25 min
+3. Grilled Salmon in Ginger Marinade - Dinner - 20 min
+4. Rainbow Buddha Bowl - Lunch/Dinner - 30 min
+5. Brain-Healthy Trail Mix - Snack - 5 min
+
+MONDAY:
+- Breakfast: Swiss Overnight Oats (prep Sunday night!)
+- Lunch: Lentil Dal with Spinach (make a big batch)
+- Dinner: Grilled Salmon with steamed veggies
+- Snack: Brain-Healthy Trail Mix
+
+TUESDAY:
+- Breakfast: Swiss Overnight Oats (leftovers)
+- Lunch: Lentil Dal (tastes even better day 2!)
+- Dinner: Rainbow Buddha Bowl
+- Snack: Brain-Healthy Trail Mix
+
+WEDNESDAY:
+- Breakfast: Swiss Overnight Oats (last of batch)
+- Lunch: Rainbow Buddha Bowl (leftovers)
+- Dinner: Lentil Dal
+- Snack: Brain-Healthy Trail Mix
+
+THURSDAY:
+- Breakfast: Swiss Overnight Oats (make fresh batch)
+- Lunch: Lentil Dal (last of batch)
+- Dinner: Grilled Salmon
+- Snack: Brain-Healthy Trail Mix
+
+FRIDAY:
+- Breakfast: Swiss Overnight Oats
+- Lunch: Rainbow Buddha Bowl (make fresh)
+- Dinner: Rainbow Buddha Bowl
+- Snack: Brain-Healthy Trail Mix
+
+BRAIN_TIP: Start each morning with a glass of warm water and lemon - it hydrates your brain and aids digestion!
+\`\`\`
+
+**Why these recipes are brain-boosters:**
+- **Salmon**: Packed with DHA omega-3s, the building blocks of brain cell membranes
+- **Lentil Dal**: Turmeric helps your brain absorb omega-3s better
+- **Overnight Oats**: Fiber keeps blood sugar steady for sustained focus
+- **Buddha Bowl**: Colorful veggies = diverse antioxidants protecting brain cells
+- **Trail Mix**: Walnuts literally look like little brains - they're full of omega-3s!
+
+Would you like me to show you any of these recipes in detail?`,
+
+      `Hi ${userName}! Here's your Mediterranean Mind Week - a fresh set of **5 brain-boosting recipes**:
+
+\`\`\`weekly_plan
+WEEK: Mediterranean Mind Week
+DESCRIPTION: Mediterranean-inspired meals packed with omega-3s and antioxidants for peak brain performance.
+
+RECIPES_THIS_WEEK:
+1. Blueberry Brain Smoothie - Breakfast - 5 min
+2. Turmeric Chickpea Bowl - Lunch/Dinner - 20 min
+3. Walnut-Crusted Baked Salmon - Dinner - 25 min
+4. Spinach and Sweet Potato Soup - Lunch/Dinner - 30 min
+5. Dark Chocolate Almond Bites - Snack - 10 min
+
+MONDAY:
+- Breakfast: Blueberry Brain Smoothie
+- Lunch: Turmeric Chickpea Bowl (make a big batch)
+- Dinner: Walnut-Crusted Baked Salmon
+- Snack: Dark Chocolate Almond Bites
+
+TUESDAY:
+- Breakfast: Blueberry Brain Smoothie
+- Lunch: Turmeric Chickpea Bowl (leftovers)
+- Dinner: Spinach and Sweet Potato Soup (make a big pot)
+- Snack: Dark Chocolate Almond Bites
+
+WEDNESDAY:
+- Breakfast: Blueberry Brain Smoothie
+- Lunch: Spinach and Sweet Potato Soup (leftovers)
+- Dinner: Turmeric Chickpea Bowl
+- Snack: Dark Chocolate Almond Bites
+
+THURSDAY:
+- Breakfast: Blueberry Brain Smoothie
+- Lunch: Spinach and Sweet Potato Soup (last of batch)
+- Dinner: Walnut-Crusted Baked Salmon
+- Snack: Dark Chocolate Almond Bites
+
+FRIDAY:
+- Breakfast: Blueberry Brain Smoothie
+- Lunch: Turmeric Chickpea Bowl (make fresh)
+- Dinner: Spinach and Sweet Potato Soup
+- Snack: Dark Chocolate Almond Bites
+
+BRAIN_TIP: Pair turmeric with black pepper to increase curcumin absorption by up to 2000% - your brain will thank you!
+\`\`\`
+
+**Why these recipes are brain-boosters:**
+- **Blueberries**: Anthocyanins cross the blood-brain barrier and protect neurons
+- **Turmeric + Chickpeas**: Curcumin reduces brain inflammation and boosts memory
+- **Walnut-Crusted Salmon**: Double omega-3 power from walnuts AND salmon
+- **Spinach + Sweet Potato**: Folate and beta-carotene fuel brain cell repair
+- **Dark Chocolate**: Flavonoids increase blood flow to the brain
+
+Would you like me to show you any of these recipes in detail?`,
+
+      `Hi ${userName}! Here's your Focus & Energy Week - **5 recipes** designed to keep you sharp all day:
+
+\`\`\`weekly_plan
+WEEK: Focus and Energy Week
+DESCRIPTION: Recipes rich in B-vitamins and iron to sustain mental energy and concentration throughout the day.
+
+RECIPES_THIS_WEEK:
+1. Green Power Smoothie Bowl - Breakfast - 10 min
+2. Quinoa Mediterranean Salad - Lunch - 15 min
+3. Herb-Baked Mackerel with Greens - Dinner - 25 min
+4. Roasted Beet and Lentil Bowl - Lunch/Dinner - 35 min
+5. Omega Trail Mix - Snack - 5 min
+
+MONDAY:
+- Breakfast: Green Power Smoothie Bowl
+- Lunch: Quinoa Mediterranean Salad (make a big batch)
+- Dinner: Herb-Baked Mackerel with Greens
+- Snack: Omega Trail Mix
+
+TUESDAY:
+- Breakfast: Green Power Smoothie Bowl
+- Lunch: Quinoa Mediterranean Salad (leftovers)
+- Dinner: Roasted Beet and Lentil Bowl (make extra)
+- Snack: Omega Trail Mix
+
+WEDNESDAY:
+- Breakfast: Green Power Smoothie Bowl
+- Lunch: Roasted Beet and Lentil Bowl (leftovers)
+- Dinner: Quinoa Mediterranean Salad
+- Snack: Omega Trail Mix
+
+THURSDAY:
+- Breakfast: Green Power Smoothie Bowl
+- Lunch: Roasted Beet and Lentil Bowl (last of batch)
+- Dinner: Herb-Baked Mackerel with Greens
+- Snack: Omega Trail Mix
+
+FRIDAY:
+- Breakfast: Green Power Smoothie Bowl
+- Lunch: Quinoa Mediterranean Salad (make fresh)
+- Dinner: Roasted Beet and Lentil Bowl
+- Snack: Omega Trail Mix
+
+BRAIN_TIP: Eat your biggest brain-food meal at lunch - your brain uses the most energy between 10am and 2pm!
+\`\`\`
+
+**Why these recipes are brain-boosters:**
+- **Green Smoothie Bowl**: Spinach and avocado deliver folate and healthy fats for neuron health
+- **Quinoa Salad**: Complete protein with all 9 amino acids your brain needs
+- **Mackerel**: Even higher in omega-3s than salmon, and more affordable
+- **Beet + Lentil Bowl**: Beets boost blood flow to the brain; lentils provide steady energy
+- **Omega Trail Mix**: A quick hit of brain-essential fatty acids
+
+Would you like me to show you any of these recipes in detail?`
+    ]
   }
 }
 
