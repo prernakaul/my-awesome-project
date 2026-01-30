@@ -310,7 +310,7 @@ Remember to keep recommendations simple and achievable for this user's skill lev
         'Authorization': `Bearer ${GROQ_API_KEY}`
       },
       body: JSON.stringify({
-        model: 'llama-3.1-70b-versatile',
+        model: 'llama-3.3-70b-versatile',
         messages: llmMessages,
         max_tokens: 4096,
         temperature: 0.7
