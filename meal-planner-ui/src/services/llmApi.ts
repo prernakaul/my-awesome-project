@@ -89,32 +89,79 @@ function violatesDietaryRestrictions(recipe: KnowledgeRecipe, restrictions: stri
   return false
 }
 
+const GOAL_LABELS: Record<string, string> = {
+  focus: 'Better Focus',
+  memory: 'Memory Support',
+  energy: 'Mental Energy',
+  mood: 'Mood Balance',
+  longevity: 'Brain Longevity'
+}
+
+const GOAL_KEYWORDS: Record<string, { pattern: RegExp; why: string }> = {
+  focus:     { pattern: /energy|sustained|focus|b.vitamin|concentration/,       why: 'sustained energy and B vitamins for concentration' },
+  memory:    { pattern: /memory|choline|dha|omega/,                             why: 'omega-3 DHA and choline for memory' },
+  energy:    { pattern: /energy|sustained|b.vitamin|carb|iron/,                 why: 'complex carbs and B vitamins for mental stamina' },
+  mood:      { pattern: /anti.inflammatory|omega|antioxidant|mood/,             why: 'anti-inflammatory compounds for emotional balance' },
+  longevity: { pattern: /antioxidant|protect|anti.inflammatory|decline/,        why: 'antioxidants that protect brain cells from aging' },
+}
+
+const TIME_LABELS: Record<string, string> = {
+  minimal: '15 minutes or less',
+  limited: '15-30 minutes',
+  moderate: '30-45 minutes',
+  flexible: '45+ minutes'
+}
+
+interface RecipePick {
+  recipe: KnowledgeRecipe
+  reason: string
+}
+
 function goalScore(recipe: KnowledgeRecipe, goals: string[]): number {
   const benefit = recipe.brainBenefit.toLowerCase()
   let score = 0
   for (const goal of goals) {
-    switch (goal) {
-      case 'focus':
-        if (/energy|sustained|focus|b.vitamin|concentration/.test(benefit)) score++
-        break
-      case 'memory':
-        if (/memory|choline|dha|omega/.test(benefit)) score++
-        break
-      case 'energy':
-        if (/energy|sustained|b.vitamin|carb|iron/.test(benefit)) score++
-        break
-      case 'mood':
-        if (/anti.inflammatory|omega|antioxidant|mood/.test(benefit)) score++
-        break
-      case 'longevity':
-        if (/antioxidant|protect|anti.inflammatory|decline/.test(benefit)) score++
-        break
-    }
+    const kw = GOAL_KEYWORDS[goal]
+    if (kw && kw.pattern.test(benefit)) score++
   }
   return score
 }
 
-function pickBest(recipes: KnowledgeRecipe[], profile: UserProfile): KnowledgeRecipe {
+function buildReason(recipe: KnowledgeRecipe, profile: UserProfile): string {
+  const parts: string[] = []
+  const benefit = recipe.brainBenefit.toLowerCase()
+  const goals = profile.goals || []
+
+  // Which goals does this recipe match?
+  const matchedGoals = goals.filter(g => {
+    const kw = GOAL_KEYWORDS[g]
+    return kw && kw.pattern.test(benefit)
+  })
+  if (matchedGoals.length > 0) {
+    const goalNames = matchedGoals.map(g => GOAL_LABELS[g] || g).join(' & ')
+    const whys = matchedGoals.map(g => GOAL_KEYWORDS[g].why)
+    parts.push(`supports your ${goalNames} goal — ${recipe.brainBenefit} (${whys.join('; ')})`)
+  } else {
+    parts.push(`brain benefit: ${recipe.brainBenefit}`)
+  }
+
+  // Time fit
+  const mins = parseMinutes(recipe.time)
+  const maxMins = getMaxMinutes(profile.cookingTime)
+  if (mins <= maxMins) {
+    parts.push(`fits your ${TIME_LABELS[profile.cookingTime] || profile.cookingTime} cooking window (${recipe.time})`)
+  }
+
+  // Dietary fit
+  const restrictions = profile.dietaryRestrictions
+  if (restrictions && restrictions.toLowerCase() !== 'none') {
+    parts.push(`compatible with your ${restrictions} diet`)
+  }
+
+  return parts.join('; ')
+}
+
+function pickBest(recipes: KnowledgeRecipe[], profile: UserProfile): RecipePick {
   const maxTime = getMaxMinutes(profile.cookingTime)
   const goals = profile.goals || []
 
@@ -142,10 +189,11 @@ function pickBest(recipes: KnowledgeRecipe[], profile: UserProfile): KnowledgeRe
     return diff !== 0 ? diff : Math.random() - 0.5
   })
 
-  return candidates[0]
+  const recipe = candidates[0]
+  return { recipe, reason: buildReason(recipe, profile) }
 }
 
-function selectWeeklyRecipes(profile: UserProfile): KnowledgeRecipe[] {
+function selectWeeklyRecipes(profile: UserProfile): RecipePick[] {
   return [
     pickBest(RECIPES.breakfast, profile),
     pickBest(RECIPES.lunch, profile),
@@ -163,31 +211,42 @@ function getCategoryName(recipe: KnowledgeRecipe): string {
   return 'Smoothie'
 }
 
-function buildMealPlanPrompt(selected: KnowledgeRecipe[], profile: UserProfile): string {
-  const recipeList = selected.map((r, i) =>
-    `${i + 1}. "${r.name}" - ${getCategoryName(r)} - ${r.time}`
+function buildMealPlanPrompt(picks: RecipePick[], profile: UserProfile): string {
+  const goalNames = (profile.goals || []).map(g => GOAL_LABELS[g] || g).join(', ')
+
+  const recipeListWithReasons = picks.map((p, i) =>
+    `${i + 1}. "${p.recipe.name}" (${getCategoryName(p.recipe)}, ${p.recipe.time})\n   WHY: ${p.reason}`
   ).join('\n')
 
-  const recipesThisWeek = selected.map((r, i) =>
-    `${i + 1}. ${r.name} - ${getCategoryName(r)} - ${r.time}`
+  const recipesThisWeek = picks.map((p, i) =>
+    `${i + 1}. ${p.recipe.name} - ${getCategoryName(p.recipe)} - ${p.recipe.time}`
   ).join('\n')
 
-  return `Create a weekly meal plan (Monday through Friday) for ${profile.name || 'the user'} using ONLY these 5 recipes. Use each recipe name EXACTLY as written below — do not change, shorten, or rephrase any name.
+  return `Create a personalized weekly meal plan (Monday through Friday) for ${profile.name || 'the user'}.
 
-The 5 recipes for this week:
-${recipeList}
-
-User context:
-- Cooking skill: ${profile.skillLevel}
-- Time available: ${profile.cookingTime}
-- Goals: ${profile.goals?.join(', ') || 'general brain health'}
+## About this user:
+- Name: ${profile.name || 'Friend'}
+- Cooking skill: ${profile.skillLevel} (${profile.skillLevel === 'beginner' ? 'keep instructions very simple' : profile.skillLevel === 'intermediate' ? 'can handle moderate complexity' : 'comfortable with any technique'})
+- Time for cooking: ${TIME_LABELS[profile.cookingTime] || profile.cookingTime}
+- Brain-health goals: ${goalNames || 'General brain health'}
 - Dietary restrictions: ${profile.dietaryRestrictions || 'none'}
+- Servings needed: ${profile.servings || '2'}
 
-Output the plan in this EXACT format (no deviations):
+## Recipes selected for ${profile.name || 'this user'} (and why):
+${recipeListWithReasons}
+
+## Instructions:
+1. Use each recipe name EXACTLY as written — do not change, shorten, or rephrase any name.
+2. In the DESCRIPTION, mention the user's goals (${goalNames}) and explain how this plan addresses them.
+3. Use batch cooking logic — cook once, eat leftovers on subsequent days.
+4. In the daily schedule, add parenthetical notes like (make a big batch), (leftovers), (prep night before).
+5. The BRAIN_TIP should be specifically relevant to the user's goals: ${goalNames}.
+
+Output the plan in this EXACT format:
 
 \`\`\`weekly_plan
-WEEK: [Creative week name]
-DESCRIPTION: [Brief description tailored to the user's goals]
+WEEK: [Creative week name that reflects the user's goals]
+DESCRIPTION: [2-3 sentences: reference ${profile.name}'s specific goals (${goalNames}) and how these recipes address them]
 
 RECIPES_THIS_WEEK:
 ${recipesThisWeek}
@@ -222,10 +281,10 @@ FRIDAY:
 - Dinner: [recipe name] (optional note)
 - Snack: [recipe name]
 
-BRAIN_TIP: [One actionable brain-health tip for the week, relevant to the user's goals]
+BRAIN_TIP: [One actionable tip specifically for ${goalNames}]
 \`\`\`
 
-After the plan, explain WHY each recipe was chosen for this user's goals (2-3 sentences each). Use batch cooking logic — cook once, eat leftovers on subsequent days. Note this in parentheses like (leftovers) or (make a big batch).`
+After the plan, write a section titled "**Why these recipes were chosen for you, ${profile.name}:**" and explain each recipe's connection to their specific goals (${goalNames}), cooking time preference, and dietary needs. Be personal and specific — don't give generic brain-health advice.`
 }
 
 // ── LLM Service ─────────────────────────────────────────────────────
@@ -253,27 +312,26 @@ Remember to keep recommendations simple and achievable for this user's skill lev
       (lower.includes('create') && (lower.includes('plan') || lower.includes('meal')))
   }
 
-  private selectRecipes(profile: UserProfile): KnowledgeRecipe[] {
-    const selected = selectWeeklyRecipes(profile)
+  private selectRecipes(profile: UserProfile): RecipePick[] {
+    const picks = selectWeeklyRecipes(profile)
 
     // If this is the same set as last time, try to swap at least one recipe
-    const selectedIds = new Set(selected.map(r => r.id))
+    const selectedIds = new Set(picks.map(p => p.recipe.id))
     if (this.lastSelectedIds.size > 0 && setsEqual(selectedIds, this.lastSelectedIds)) {
-      // Try swapping each category for an alternative
       const categories = [RECIPES.breakfast, RECIPES.lunch, RECIPES.dinner, RECIPES.snacks, RECIPES.smoothies]
-      for (let i = 0; i < selected.length; i++) {
+      for (let i = 0; i < picks.length; i++) {
         const pool = categories[i]
-        const alt = pool.find(r => r.id !== selected[i].id &&
+        const alt = pool.find(r => r.id !== picks[i].recipe.id &&
           !violatesDietaryRestrictions(r, profile.dietaryRestrictions))
         if (alt) {
-          selected[i] = alt
+          picks[i] = { recipe: alt, reason: buildReason(alt, profile) }
           break
         }
       }
     }
 
-    this.lastSelectedIds = new Set(selected.map(r => r.id))
-    return selected
+    this.lastSelectedIds = new Set(picks.map(p => p.recipe.id))
+    return picks
   }
 
   async sendMessage(
@@ -290,8 +348,8 @@ Remember to keep recommendations simple and achievable for this user's skill lev
     // based on the user's profile, then ask the LLM to arrange them.
     let llmMessages: Array<{ role: string; content: string }>
     if (this.isMealPlanRequest(lastMessage)) {
-      const selected = this.selectRecipes(userProfile)
-      const mealPlanPrompt = buildMealPlanPrompt(selected, userProfile)
+      const picks = this.selectRecipes(userProfile)
+      const mealPlanPrompt = buildMealPlanPrompt(picks, userProfile)
       llmMessages = [
         { role: 'system', content: `${SYSTEM_PROMPT}\n\n${this.buildUserContext(userProfile)}` },
         { role: 'user', content: mealPlanPrompt }
