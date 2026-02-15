@@ -19,7 +19,7 @@ An AI-powered meal planning assistant that generates personalized meal plans and
 
 - **Tech:** React, TypeScript, Vite, react-markdown
 - **Features:** AI-generated meal plans, recipe display with markdown rendering
-- **Live:** [meal-planner-ui-pks-projects-452e2467.vercel.app](https://meal-planner-ui-pks-projects-452e2467.vercel.app)
+- **Live:** [meal-planner-ui.vercel.app](https://meal-planner-ui.vercel.app)
 
 ### Travel Agent
 **`/travel-agent-ui`**
